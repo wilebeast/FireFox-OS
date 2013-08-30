@@ -1,0 +1,25 @@
+
+~ RECIPE for Running FireFox OS ("v1.1.0hd" branch) on Pandaboard ES ~ 
+
+
+1. To Build: 
+
+cd B2G 
+./build.sh -j(n) 
+
+
+2. To Flash: 
+
+[Plug in *only* USB mini cable] 
+
+device/ti/panda/usbboot device/ti/panda/bootloader.bin 
+
+[Now insert SD Card] 
+
+fastboot oem format
+fastboot flash xloader device/ti/panda/xloader.bin
+fastboot flash bootloader device/ti/panda/bootloader.bin
+./flash.sh 
+
+[Use Serial-to-USB cable to run Gtkterm or Minicom.] 
+

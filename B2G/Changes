@@ -1,0 +1,5 @@
+
+Changes From Mozilla's Original Build 
+
+- [flash.sh] to suit Pandaboard
+- B2G resolution changed in [gonk-misc/b2g.sh] 
