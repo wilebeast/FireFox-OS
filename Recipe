@@ -4,6 +4,9 @@
 
 1. To Build: 
 
+export CC=/opt/gcc-4.4.7/bin/gcc
+export CXX=/opt/gcc-4.4.7/bin/g++
+
 cd B2G 
 ./build.sh -j(n) 
 
