@@ -1,0 +1,2 @@
+skip-if(B2G) load 420429.xul # bug 834382
+load 453278.html
