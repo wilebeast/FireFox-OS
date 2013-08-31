@@ -1,0 +1,69 @@
+if [ "$TARGET_BUILD_VARIANT" != "user" ] ; then
+ENABLE_MARIONETTE=1
+fi
+
+mk_add_options MOZ_OBJDIR="$GECKO_OBJDIR"
+
+# XXX our build system doesn't seem to respect toplevel -j ...
+# hard-coding this sucks
+mk_add_options MOZ_MAKE_FLAGS="-s $MAKE_FLAGS"
+
+if [ "$TARGET_ARCH" = "x86" ]; then
+ac_add_options --target=i686-android-linux
+else
+ac_add_options --target=arm-linux-androideabi
+# Disabled for now since this disables enough stripping that our
+# system.img on the sgs2 exceeds 100MB and heimdall fails to work right.
+#ac_add_options --enable-profiling
+fi
+ac_add_options --with-gonk="$GONK_PATH"
+ac_add_options --with-gonk-toolchain-prefix="$TARGET_TOOLS_PREFIX"
+
+ac_add_options --enable-application=b2g
+
+ac_add_options --enable-debug-symbols
+if [ "${B2G_DEBUG:-0}" != "0" ]; then
+ac_add_options --enable-debug
+fi
+
+if [ "${B2G_NOOPT:-0}" != "0" ]; then
+ac_add_options --disable-optimize
+fi
+
+ac_add_options --with-ccache
+
+if [ "${DISABLE_JEMALLOC:-0}" != "0" ]; then
+ac_add_options --disable-jemalloc
+fi
+
+if [ "$HOST_OS" != "linux" ]; then
+ac_add_options --disable-crashreporter
+fi
+
+if [ "${B2G_UPDATER:-0}" != "0" ]; then
+  # Note: if B2G_UPDATE_CHANNEL isn't set, then configure will use its own
+  # default, which is "default".
+  ac_add_options --enable-updater
+  ac_add_options --enable-update-channel="${B2G_UPDATE_CHANNEL}"
+fi
+
+ac_add_options --enable-update-packaging
+
+ac_add_options --enable-b2g-camera
+
+# Enable dump() from JS.
+export CXXFLAGS="-DMOZ_ENABLE_JS_DUMP $EXTRA_INCLUDE"
+
+ac_add_options --with-fpu="$ARCH_ARM_VFP"
+
+# Disable IonMonkey for B2G because of regressions
+ac_add_options --disable-ion
+
+if [ "${MOZ_DMD:-0}" != 0 ]; then
+  ac_add_options --enable-dmd
+fi
+
+if [ "${ENABLE_GLOBAL_PRELINK:-0}" != 0 ]; then
+# Disable ELF_HACK on B2G for prelink.
+ac_add_options --disable-elf-hack
+fi

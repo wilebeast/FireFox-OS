@@ -1,0 +1,253 @@
+* Note
+Most of this has moved to the mozilla wiki 
+
+https://wiki.mozilla.org/B2G/RIL
+
+I'm just keeping this around if we still need it while working on the RIL.
+
+* B2G Dialer Test
+** Description
+
+This program demonstrates how to communicate with the B2G RIL daemon,
+for dialing the phone, dealing with SMS, and other actions requiring
+access to the cell phone radio.
+
+** Goals
+
+- Create patch to make android radio core not connect to rild socket
+- Figure out/find documentation for commands for ril events
+- Create function that will dial phone via socket calls
+- Create function that will wait for an SMS message (async) via sockets
+
+* Talking to the Radio
+** Low Level Access
+
+Kernel access for specific phones are vendor specific, included in the
+phone's firmware distribution. To access these drivers, android uses
+the libril library. Information on libril and android's telephony
+architecture is available at
+
+[[http://www.netmite.com/android/mydroid/development/pdk/docs/telephony.html]]
+
+Source code for libril and rild is available in the B2G checkout as
+
+glue/gonk/hardware/ril
+
+** Socket Access
+
+In order to access libril, android uses an ipc socket interface to the
+rild daemon. The daemon simply creates a socket named "rild" and
+manages transfers of ipc parcels
+(http://developer.android.com/reference/android/os/Parcel.html)
+through it.
+
+A sample emulator implementation of rild is available alongside the
+libril source code. Actual rild implementations for phones are
+proprietary and distributed by the vendor.
+
+Due to wanting a single event source for dealing with events, the rild
+socket requires exclusive access from a single process. In a normal
+android installation, this would happen via the com.android.phone
+process. In order to make our own code talk to the socket, the current
+strategy is to change the socket name in the RIL.java file to
+something other than "rild" (since we can't recompile vendor specific
+rild). 
+
+** Android Access
+Android code specific to RIL communication is in 
+
+glue/gonk/frameworks/base/telephony/java/com/android/internal/telephony/RIL.java
+
+The Java code communicates with the rild socket via the Binder IPC
+system, using objects known as Parcels. Parcels are simply flattened,
+serialized data structures. libbinder exists for C++ in
+glue/gonk/frameworks. 
+
+To access sockets via C, android uses libcutils, also available in
+glue/gonk/frameworks.
+** Parcel Formats
+Parcels contain information about the transaction that they are a part
+of, as well as event data.
+
+Event data will be one of the follow types:
+
+- Void - No return
+- Int List - First int is the number of ints in the list, followed by the ints
+  - Byte 0x0c - uint32_t - number of ints in the packet
+  - Byte 0x10 - uint32_t* - list of ints
+- String - A single string (16-bit)
+  - Byte 0x0c - uint32_t - length of string
+  - Byte 0x10 - wchar_t* - string of length specified
+- Strings - An array of strings (16-bit)
+  - Byte 0x0c - uint32_t - number of strings
+  - Byte 0x10 - Strings - strings in format listed for single string (size + string)
+- Custom Struct - A set of different types specific to the message (SMS messages, call lists, etc...)
+*** RIL Parcel - Process -> rild
+
+Each RIL Socket Write has the following format:
+
+- Byte 0x00 - uint32_t - Header (Size of Following Parcel)
+  - PARCEL BEGINS AFTER THIS FIELD
+- Byte 0x04 - uint32_t - RIL Event ID (IDs available in glue/gonk/hardware/ril/include/telephony/ril.h)
+- Byte 0x08 - uint32_t - Packet Serial Number (Used to track send/receive order)
+- Byte 0x0c - void* - Event Data
+
+*** RIL Parcel - rild -> Process (solicited reply)
+
+Each RIL Socket Read (for a solicited response) has the following format:
+
+- Byte 0x00 - uint32_t - Header (Size of Following Parcel)
+  - PARCEL BEGINS AFTER THIS FIELD
+- Byte 0x04 - uint32_t - 0 (To signify it is a reply to a previously sent solicited request)
+- Byte 0x08 - uint32_t - Packet Serial Number (Used to track send/receive order)
+- Byte 0x0c - void* - Event Data
+
+It is expected that the client maintains a list of previously made
+solicited requests to match the replies to, via the serial field.
+
+The expectations of each RIL event are outlined in the comments for
+the fields in the ril.h file.
+
+*** RIL Parcel - rild -> Process (unsolicited event)
+Each RIL Socket Read (for a solicited response) has the following format:
+
+- Byte 0x00 - uint32_t - Header (Size of Following Parcel)
+  - PARCEL BEGINS AFTER THIS FIELD
+- Byte 0x04 - uint32_t - 1 (To signify it is a reply to a previously sent solicited request)
+- Byte 0x08 - uint32_t - RIL Event ID (IDs available in glue/gonk/hardware/ril/include/telephony/ril.h)
+- Byte 0x0c - void* - Event Data
+
+The client responds (as needed) to unsolicited events by sending a
+solicited event, which follows the outline mentioned above.
+
+The expectations of each RIL event are outlined in the comments for
+the fields in the ril.h file.
+
+* Phone Workflow
+** Initialization
+The initialization step is required to turn the radio on.
+- Program connects to rild socket
+- Radio: UNSOL_RESPONSE_RADIO_STATE_CHANGED with radio status
+- Program: SCREEN_STATE to TRUE
+- Program: RADIO_POWER (Turns radio on, if radio status is RADIO_STATE_OFF)
+** Service Status Update
+- Radio: UNSOL_RESPONSE_NETWORK_STATE_CHANGED
+- Program: OPERATOR
+- Program: REGISTRATION_STATE
+- Program: GPRS_REGISTRATION_STATE
+** Dialing
+- Go through initialization and Service Status Update steps
+- Program: DIAL
+(Just dialing doesn't work)
+** Hanging Up
+- Android app usually sends REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND
+- Continually checks GET_CURRENT_CALLS, which may error the first time around? [[https://github.com/kmachulis-mozilla/b2g-dialer-test/issues/13]]
+** Call Receive
+** SMS Receive
+- Radio: UNSOL_RESPONSE_NEW_SMS
+- Program: RIL_REQUEST_SMS_ACKNOWLEDGE
+* Gecko Design
+For preliminary design documentation of WebTelephony/WebAPI, see [[https://wiki.mozilla.org/WebAPI/WebTelephony]]
+** Design Overview
+The RIL communications system will consist events in the context of 3
+threads, as well as a socket proxy daemon:
+
+- The IPC Thread, where IO to the Radio Socket will happen
+- A JS Worker thread, where low level telephony support (parsing
+  parcels to/from socket, dealing with GSM/CDMA/SIP and SIM card
+  commands, etc...) will be implemented
+- The Main Gecko Thread, where the Telephony DOM will expose high
+  level commands to the navigator.phone object.
+** Radio Base Class - IO Thread
+The Radio Base Class declares the basic communication function
+signatures for radios, as well as managing a queue of binary blobs
+coming from and going to the radio. It contains no knowledge of the
+blob structure, just blob length and the blobs themselves. This means
+we can push the Parcel (or whatever serialization method we decide to
+use) creation up into the Telephone class, keeping Radio in its own
+thread to deal with I/O.
+** Radio JS Worker Thread
+The Radio Implementation class will handle
+
+- Providing an interface to phone status (Network Name, Signal
+  Strength, Current Calls, Radio Events, etc...)
+- Creating and Managing data in flight from/to the radio
+
+Radio communication at the parcel level happens in the worker thread,
+which then queues the serialized binary blobs to the Radio I/O thread.
+It also reads information sent from the radio, to trigger events like
+incoming calls.
+
+** Telephony DOM
+The Telephone class is responsible for exposing high level functions
+to Javascript (Dial, Hangup, SMS, etc...). More information on this is
+available as part of the WebTelephony project.
+* Utilities and Tips
+** Building
+- Set the path of your local Android NDK and B2G, i.e. export
+  NDK=/opt/android-ndk-r6b
+- Run scripts/android_env.sh
+- cmake .
+- make
+
+** Debugging
+
+The command "logcat -b radio" in the android shell will print all radio messages
+
+Tracing the packet formats going between com.android.phone and the
+rild socket can be achieved by watching strace on the rild
+process. Due to the fact that rild spawns multiple threads, this
+should be done with the fork option, i.e.
+
+strace -p XXXX -f 
+
+To trigger events that happens from outside the network, the
+rild-debug socket is provided by rild. This socket responds to a
+different set of commands, in order to inject RIL events into the ril
+core. It's mainly used for testing new ril implementations.
+
+** Tools
+*** ADB convenience
+To automate some of the common tasks involved with resetting processes
+on the phone, watching logs, etc... I've made a few different custom
+targets in the CMake file. These can be run using 
+
+make [target_name]
+
+in the out-of-source build directory. The targets are:
+
+- adbpush - Push b2g-dialer-test binary to phone.
+- adbdial - Run b2g-dialer-test. Currently does not work.
+- adbrwmount - Remount / and /system as rw for duration of session
+  (i.e. until next reboot)
+- adbjavaon/adbjavaoff - With the patch to the android code, java now
+  tries to connect to /dev/socket/rild2 instead of /dev/socket/rild.
+  This allows us to connect to rild via our own process when needed,
+  but also means we can symlink rild2 to rild when we want to watch
+  how android interacts with something (useful for analyzing code
+  flow). adbjavaon creates the symlink (at which point b2g-dialer-test
+  binary will fail due to needing exclusing socket access). adbjavaoff
+  will remove the symlink and kill the android phone process, causing
+  it to drop its connection to the socket.
+
+*** b2g-dialer-forward
+b2g-dialer-forward is a utility for forwarding the rild unix socket to
+the network, so that developers can work on API. adb forward is
+available to unix sockets, but due to the account access check for
+'radio' by rild, we need to establish the network port as root, then
+communicate with the socket as rild.
+
+b2g-dialer-forward connects the rild unix socket to port 5555 on the
+phone. This can then be forwarded to the desktop using adb forward
+with the tcp protocol. 
+
+As an example, the dialer.py test script uses this utility to talk to
+the phone daemon without having to actually run on the phone.
+** Relevant Websites
+- [[http://i-miss-erin.blogspot.com/2009/11/radio-layer-interface-in-android.html][Hooking up Android to a GSM radio on the BeagleBoard]]
+- [[http://www.netmite.com/android/mydroid/development/pdk/docs/telephony.html][libril Documentation]]
+- [[https://groups.google.com/forum/#!topic/android-porting/lo90a3Bb1nA][Small thread on ril stuff]]
+- [[http://www.slideshare.net/ssusere3af56/android-radio-layer-interface][Android Radio Interface Layer]]
+- [[http://www.slideshare.net/dpsmarques/android-telephony-stack][Android Telephony Stack]]
+
+

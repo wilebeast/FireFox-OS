@@ -1,0 +1,44 @@
+#!/system/bin/sh
+# ps output is: user pid ppid vss rss wchan eip state cmdline
+#
+# b2g-ps is essentially a filtered ps. It only shows the b2g apps and also
+# prepends each line with the name of the process.
+
+report_oom=0
+
+for arg in "$@"
+  do
+    case "$arg" in
+      "--oom")
+        report_oom=1
+      ;;
+    *)
+        args="${args} ${arg}"
+      ;;
+    esac
+  done
+
+toolbox ps $args | (
+  IFS= read header
+  new_hdr="APPLICATION     "
+  if [ "${report_oom}" == "1" ]; then
+    new_hdr="${new_hdr}  OOM_ADJ  OOM_SCORE  OOM_SCORE_ADJ "
+  fi
+  echo "${new_hdr} ${header}"
+  while read line; do
+    if [ "${line/*b2g*/b2g}" = "b2g" ]; then
+      echo ${line} | (
+        read user pid rest;
+        comm="$(cat /proc/${pid}/comm)                "
+        new_fields="${comm:0:16}"
+        if [ "${report_oom}" == "1" ]; then
+          oom_adj="   $(cat /proc/${pid}/oom_adj)    "
+          oom_score="   $(cat /proc/${pid}/oom_score)      "
+          oom_score_adj="    $(cat /proc/${pid}/oom_score_adj)         "
+          new_fields="${new_fields}  ${oom_adj:0:7}  ${oom_score:0:9}  ${oom_score_adj:0:12}  "
+        fi
+        echo "${new_fields} ${line}"
+      )
+    fi
+  done
+)
