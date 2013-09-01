@@ -1,0 +1,13 @@
+{
+    "remote_phone_number": "",
+    "this_phone_number": "",
+
+    "wifi": {
+        "ssid": ""
+    },
+
+    "marketplace": {
+        "username": "",
+        "password": ""
+    }
+}

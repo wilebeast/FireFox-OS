@@ -1,0 +1,22 @@
+{
+  "ar"        : "عربي",
+  "ca"        : "Català",
+  "cs"        : "Čeština",
+  "de"        : "Deutsch",
+  "el"        : "Ελληνικά",
+  "en-US"     : "English (US)",
+  "es"        : "Español",
+  "fr"        : "Français",
+  "hr"        : "Hrvatski",
+  "hu"        : "Magyar",
+  "nl"        : "Nederlands",
+  "pl"        : "Polski",
+  "pt-BR"     : "Português (do Brasil)",
+  "ro"        : "Română",
+  "ru"        : "Русский",
+  "sk"        : "Slovenčina",
+  "sr-Cyrl"   : "Српски",
+  "sr-Latn"   : "Srpski",
+  "tr"        : "Türkçe",
+  "zh-TW"     : "正體中文 (繁體)"
+}

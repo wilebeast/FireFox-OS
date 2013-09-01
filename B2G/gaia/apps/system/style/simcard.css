@@ -1,0 +1,55 @@
+#simpin-dialog {
+  background: white;
+  color: #000;
+}
+
+#simpin-dialog section[role="region"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+#simpin-dialog .container {
+  padding: 0 2rem;
+  font-size: 1.5rem;
+}
+
+#simpin-dialog .container div {
+  white-space: normal;
+}
+
+#simpin-dialog .container > div {
+  padding-top: 1rem;
+}
+
+#errorMsg{
+  padding: 1rem;
+}
+
+#simpin-dialog .error #messageHeader {
+  color: red;
+}
+
+/* for simpin error message,
+ * to override [role="dialog"] rules in core.css*/
+#messageBody {
+  color: #000;
+  white-space: normal;
+}
+
+#simpin-dialog .input-wrapper {
+  position: relative;
+}
+
+#simpin-dialog .input-wrapper input {
+  font-size: 3rem;
+  display: block;
+  width: auto;
+}
+
+#xckArea .input-wrapper input {
+  font-size: 1.8em;
+}
+

@@ -1,0 +1,60 @@
+#attention-screen {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: none;
+
+  transition: transform 0.5s ease;
+}
+
+#attention-screen.displayed {
+  display: block;
+}
+
+#screen.active-statusbar #attention-screen {
+  transform: translateY(calc(-100% + 4rem));
+}
+
+#screen.active-statusbar #attention-screen.status-mode {
+  height: 4rem;
+  transform: translateY(0);
+  transition: none;
+}
+
+#screen.attention.active-statusbar #statusbar {
+  display: none;
+}
+
+#attention-screen.status-mode > iframe,
+#screen.lockscreen-camera > #attention-screen > iframe {
+  margin-top: 0;
+  height: 100%;
+}
+
+#attention-screen > iframe {
+  border: 0;
+  width: 100%;
+  /* we have the 2rem status bar on top */
+  height: calc(100% - 2rem);
+  margin-top: 2rem;
+  background-color: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#attention-screen > #attention-bar {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Status bar height * 2 */
+  height: 4rem;
+  z-index: 2;
+  display: none;
+}
+
+#screen.active-statusbar #attention-screen > #attention-bar {
+  display: block;
+}

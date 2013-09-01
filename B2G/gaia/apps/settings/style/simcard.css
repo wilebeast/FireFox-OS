@@ -1,0 +1,36 @@
+#simpin ul li > p {
+  line-height: 2.2rem;
+  text-overflow: inherit;
+  white-space: normal;
+  padding: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+#simpin-dialog .container {
+  padding-left: 2rem;
+  font-size: 1.6em;
+}
+
+#simpin-dialog .container > div {
+  padding-top: 1rem;
+}
+
+#simpin-dialog .error #messageHeader {
+  color: red;
+}
+
+#simpin-dialog .input-wrapper {
+  position: relative;
+}
+
+#simpin-dialog .input-wrapper input {
+  font-size: 2.1rem;
+  display: block;
+  width: auto;
+}
+
+#simpin-dialog .input-wrapper input[type="number"] {
+  padding: 0;
+  height: 4rem;
+}
+

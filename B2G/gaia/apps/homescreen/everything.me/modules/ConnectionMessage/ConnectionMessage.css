@@ -1,0 +1,8 @@
+#evmeContainer .connection-message {
+    width: 100%;
+    padding: 0 5rem;
+    color: #fff;
+    font-size: 1.6rem;
+    text-align: center;
+    -moz-box-sizing: border-box;
+}

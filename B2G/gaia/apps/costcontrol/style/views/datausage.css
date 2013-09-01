@@ -1,0 +1,91 @@
+/* DATAUSAGE VIEW */
+#datausage-tab .content {
+  padding: 0;
+}
+
+/* DATA TOGGLE */
+#datausage-tab .toggle-data {
+  list-style: none;
+  padding: 0;
+  margin: 0 1.5rem;
+  border: solid 0.1rem #adadad;
+  border-right: none;
+  border-left: none;
+  border-bottom: none;
+}
+
+#datausage-tab .toggle-data li {
+  padding-left: 3rem;
+  height: 3.8rem;
+  border-bottom-color: #adadad;
+}
+
+#datausage-tab .toggle-data li p {
+  color: #707070;
+}
+
+#datausage-tab .toggle-data li p:only-child,
+#datausage-tab .toggle-data li p:first-of-type:last-of-type {
+  line-height: 1.8rem;
+}
+
+#datausage-tab .toggle-data li p strong {
+  color: #333;
+}
+
+#datausage-tab .toggle-data li label {
+  height: 100%;
+  pointer-events: auto;
+  left: 0;
+  border: none;
+}
+
+#datausage-tab .toggle-data li label span {
+  right: 0;
+  left: auto;
+}
+
+
+/* Color legend (square) */
+#datausage-tab .toggle-data li:before {
+  content: "";
+  width: 1.5rem;
+  height: 1.5rem;
+  position: absolute;
+  border: solid 0.1rem #979797;
+  left: 0.5rem;
+  top: 50%;
+  margin: -0.95rem 0 0;
+  transition: background 0.2s ease;
+}
+
+#datausage-tab .toggle-data li:first-child:before {
+  background: #975177 url(../images/app/ui/datausage/pattern-3g.png) repeat left top;
+}
+
+#datausage-tab .toggle-data li:last-child:before {
+  background-color: #d4e073;
+}
+
+/* Disabled state */
+#datausage-tab .toggle-data li[aria-disabled=true]:before {
+  background: #d4d2d2;
+}
+
+#datausage-tab .toggle-data li[aria-disabled=true] .overview {
+  display: none;
+}
+
+/* GRAPHS */
+#datausage-tab section.graph {
+  position: relative;
+  height: 28.5rem;
+}
+
+#datausage-tab section.graph canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}

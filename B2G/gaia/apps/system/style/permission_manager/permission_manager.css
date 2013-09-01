@@ -1,0 +1,123 @@
+#permission-screen {
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 2rem);
+  background-color: rgba(0,0,0,0.4);
+  -moz-transition: opacity 0.5s ease;
+  pointer-events: none;
+  display: none;
+}
+
+#screen:-moz-full-screen-ancestor > #permission-screen,
+#screen.fullscreen-app #permission-screen,
+#screen.lockscreen-camera #permission-screen {
+  top: 0;
+  height: 100%;
+}
+
+#screen.attention #permission-screen {
+  top: 4rem;
+  height: calc(100% - 4rem);
+}
+
+#permission-screen.visible {
+  pointer-events: auto;
+  display: inline-block;
+}
+
+#permission-remember-section {
+  border-top: 0.1rem solid #686868;
+  font-size: 1.6rem;
+  display: none;
+  padding: 1.5rem;
+}
+
+#permission-message {
+  margin: 0;
+  padding-top: 1.2rem;
+  padding-bottom: 0.8rem;
+  min-height: 4.4rem;
+  font-size: 1.6rem;
+  background-repeat: no-repeat no-repeat;
+  background-size: 6.4rem auto;
+  background-position: 0 50%;
+  white-space: normal;
+}
+
+#permission-more-info {
+  margin: 1rem;
+  padding-top: 1.2rem;
+  padding-bottom: 0.8rem;
+  min-height: 4.4rem;
+  font-size: 1.6rem;
+}
+
+#permission-more-info.hidden {
+  display: none;
+}
+
+#permission-more-info a {
+  padding-bottom: 2rem;
+  color: white;
+  outline: none;
+}
+
+#permission-more-info-box {
+  padding: 1.5rem;
+  max-height: 13rem; /* XXX: use magic calc(); expression instead */
+  overflow-y: scroll;
+}
+
+#permission-more-info-box.hidden {
+  display: none;
+}
+
+#permission-screen[data-type] #permission-remember-section {
+  display: block;
+}
+
+#permission-screen[data-type] #permission-icon {
+  display: inherit;
+}
+
+#permission-screen[data-type] #permission-message {
+  padding-left: 6.4rem;
+}
+
+#permission-remember-section label {
+  float: right;
+  width: 5.8rem;
+  height: 2rem;
+}
+
+#permission-remember-label {
+  float: left;
+  width: calc(100% - 6rem);
+  line-height: 2.4rem;
+}
+
+#permission-screen[data-type="geolocation"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_Geolocation.png');
+}
+
+#permission-screen[data-type="fmradio"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_FMRadio.png');
+}
+
+#permission-screen[data-type*="camera"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_Camera.png');
+}
+
+#permission-screen[data-type*="wifi"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_WifiInformation.png');
+}
+
+#permission-screen[data-type="contacts"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_Contacts.png');
+}
+
+#permission-screen[data-type*="device-storage"] #permission-message {
+  background-image: url('images/PermissionsDialogIcons_DeviceStorage.png');
+}
