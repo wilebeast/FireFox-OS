@@ -1,6 +1,0 @@
-toolchain
-*.o
-agent
-busybox-armv6l*
-*.swp
-*.log
