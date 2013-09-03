@@ -4,8 +4,11 @@
 
 1. To Build: 
 
-export CC=/opt/gcc-4.4.7/bin/gcc
-export CXX=/opt/gcc-4.4.7/bin/g++
+export CC=/opt/gcc-4.4.7/bin/gcc 
+export CXX=/opt/gcc-4.4.7/bin/g++ 
+
+[Modify ".config" & ".var.profile" to your local directory.] 
+[Unzip the "prebuilt" toolchains into B2G.] 
 
 cd B2G 
 ./build.sh -j(n) 
@@ -19,9 +22,9 @@ device/ti/panda/usbboot device/ti/panda/bootloader.bin
 
 [Now insert SD Card] 
 
-fastboot oem format
-fastboot flash xloader device/ti/panda/xloader.bin
-fastboot flash bootloader device/ti/panda/bootloader.bin
+fastboot oem format 
+fastboot flash xloader device/ti/panda/xloader.bin 
+fastboot flash bootloader device/ti/panda/bootloader.bin 
 ./flash.sh 
 
 [Use Serial-to-USB cable to run Gtkterm or Minicom.] 

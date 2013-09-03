@@ -1,11 +1,11 @@
 
-Changes From Mozilla's Original Build 
+Changes From Mozilla's Original Build: 
 
-- [flash.sh] to suit Pandaboard 
+- Modified [flash.sh] to suit Pandaboard 
 - B2G resolution changed in [gonk-misc/b2g.sh] 
 
-- Added: external & frameworks & prebuilt  
-- Added+modified: .config & .var.profile 
+- Compressed: [prebuilt] toolchain 
+- Added+modified: [.config] & [.var.profile] 
 
-- Removed graphics driver in download-panda 
-- Removed all .git records in subfolders 
+- Removed graphics driver in [download-panda] 
+- Removed all old [.git] records in subfolders 
